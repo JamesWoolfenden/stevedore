@@ -115,7 +115,7 @@ func ParseFile(file string) (*parser.Result, error) {
 	defer func(data *os.File) {
 		err := data.Close()
 		if err != nil {
-			log.Fatal().Msgf("close error:", err)
+			log.Fatal().Msgf("close error:%s", err)
 		}
 	}(data)
 
