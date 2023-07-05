@@ -3,12 +3,13 @@ package stevedore
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/moby/buildkit/frontend/dockerfile/parser"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/moby/buildkit/frontend/dockerfile/parser"
+	"github.com/rs/zerolog/log"
 )
 
 func GetDockerLabels(from string) (map[string]interface{}, error) {

@@ -1,3 +1,5 @@
 stevedore*
 Dockerfile
 .idea/
+.DS_Store
+*.orig

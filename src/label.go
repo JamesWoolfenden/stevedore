@@ -1,10 +1,11 @@
 package stevedore
 
 import (
-	"github.com/moby/buildkit/frontend/dockerfile/parser"
-	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
+
+	"github.com/moby/buildkit/frontend/dockerfile/parser"
+	"github.com/rs/zerolog/log"
 )
 
 func Label(result *parser.Result) string {

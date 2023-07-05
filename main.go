@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	cli "github.com/urfave/cli/v2"
 	"os"
 	"sort"
 	stevedore "stevedore/src"
 	"stevedore/src/version"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	cli "github.com/urfave/cli/v2"
 )
 
 func main() {
