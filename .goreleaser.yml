@@ -24,7 +24,7 @@ archives:
         format: zip
 
 brews:
-  - name: ghat
+  - name: stevedore
 
     tap:
       owner: JamesWoolfenden
@@ -36,12 +36,12 @@ brews:
       name: "GitHub Action"
       email: action@github.com
 
-    homepage: "https://github.com/JamesWoolfenden/ghat#readme"
+    homepage: "https://github.com/JamesWoolfenden/stevedore#readme"
 
-    description: "Ghat is a tool for updating GHA dependencies"
+    description: "stevedore is a tool for managing Dockerfile labels"
 
     install: |
-      bin.install "ghat"
+      bin.install "stevedore"
 
     test: |
-      system "#{bin}/ghat", "--help"
+      system "#{bin}/stevedore", "--help"
