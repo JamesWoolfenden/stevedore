@@ -1,0 +1,126 @@
+package stevedore
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/moby/buildkit/frontend/dockerfile/parser"
+	"github.com/rs/zerolog/log"
+	"io"
+	"net/http"
+	"os"
+	"strings"
+)
+
+func GetDockerLabels(from string) (map[string]interface{}, error) {
+	version := "latest"
+	splitter := strings.SplitN(from, "/", 2)
+
+	if len(splitter) < 2 {
+		from = "library/" + from
+	}
+
+	splitterVersion := strings.SplitN(from, ":", 2)
+	if len(splitterVersion) == 2 {
+		version = splitterVersion[1]
+		from = splitterVersion[0]
+	}
+
+	token, err2 := GetAuthToken(from)
+
+	if err2 != nil {
+		return nil, err2
+	}
+
+	ParentLabels, err := GetParentLabels(from, version, token)
+
+	if err != nil {
+		return nil, fmt.Errorf("get ParentLabels failed %w", err)
+	}
+
+	return ParentLabels, nil
+}
+
+func GetParentLabels(from string, version string, token string) (map[string]interface{}, error) {
+	url := "https://registry-1.docker.io/v2/" + from + "/manifests/" + version
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to read body: %w", err)
+	}
+
+	parentContainer := make(map[string]interface{})
+	err = json.Unmarshal(body, &parentContainer)
+
+	if err != nil {
+		return nil, fmt.Errorf("marshalling fail %w", err)
+	}
+
+	history := parentContainer["history"].([]interface{})
+	temp := history[0].(map[string]interface{})
+	previous := temp["v1Compatibility"].(string)
+	parent := make(map[string]interface{})
+	err = json.Unmarshal([]byte(previous), &parent)
+
+	if err != nil {
+		return nil, fmt.Errorf("marshalling fail %w", err)
+	}
+
+	config := parent["container_config"].(map[string]interface{})
+
+	ParentLabels, ok := config["Labels"].(map[string]interface{})
+
+	if ok {
+		return ParentLabels, nil
+	}
+
+	return nil, nil
+}
+
+func ParseFile(file string) (*parser.Result, error) {
+	data, err := os.Open(file)
+	log.Info().Msgf("opening: %s", file)
+
+	if err != nil {
+		return nil, fmt.Errorf("readfile error: %w", err)
+	}
+
+	result, err := parser.Parse(data)
+
+	defer func(data *os.File) {
+		err := data.Close()
+		if err != nil {
+			log.Fatal().Msgf("close error:", err)
+		}
+	}(data)
+
+	return result, err
+}
+
+func Parse() error {
+	file := "./examples/with/Dockerfile"
+	result, err := ParseFile(file)
+
+	if err != nil {
+		return fmt.Errorf("failed to parse file %w", err)
+	}
+
+	dump := Label(result)
+
+	err = os.WriteFile("Dockerfile", []byte(dump), 0644)
+	if err != nil {
+		return fmt.Errorf("writefile error: %w", err)
+	}
+
+	log.Info().Msgf("updated: %s", "Dockerfile")
+
+	return nil
+}
