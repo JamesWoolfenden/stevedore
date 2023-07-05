@@ -48,9 +48,19 @@ func GetParentLabels(from string, version string, token string) (map[string]inte
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
 
-	res, _ := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
 
-	defer res.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute http query %w", err)
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Info().Msgf("failed to close http client")
+		}
+	}(res.Body)
+
 	body, err := io.ReadAll(res.Body)
 
 	if err != nil {
@@ -74,15 +84,21 @@ func GetParentLabels(from string, version string, token string) (map[string]inte
 		return nil, fmt.Errorf("marshalling fail %w", err)
 	}
 
-	config := parent["container_config"].(map[string]interface{})
+	config, ok := parent["container_config"].(map[string]interface{})
+
+	if !ok {
+		log.Info().Msgf("no container config")
+		return nil, nil
+	}
 
 	ParentLabels, ok := config["Labels"].(map[string]interface{})
 
-	if ok {
-		return ParentLabels, nil
+	if !ok {
+		log.Info().Msgf("no parent labels")
+		return nil, nil
 	}
 
-	return nil, nil
+	return ParentLabels, nil
 }
 
 func ParseFile(file string) (*parser.Result, error) {
