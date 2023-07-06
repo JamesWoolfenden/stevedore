@@ -1,7 +1,5 @@
 # stevedore
 
-![alt text](stevedore.png "stevedore")
-
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/jameswoolfenden/stevedore/graphs/commit-activity)
 [![Build Status](https://github.com/JamesWoolfenden/stevedore/workflows/CI/badge.svg?branch=master)](https://github.com/JamesWoolfenden/stevedore)
 [![Latest Release](https://img.shields.io/github/release/JamesWoolfenden/stevedore.svg)](https://github.com/JamesWoolfenden/stevedore/releases/latest)
@@ -52,7 +50,7 @@ brew install jameswoolfenden/tap/stevedore
 
 ### Windows
 
-I'm now using Scoop to distribute releases, 
+I'm now using Scoop to distribute releases,
 it's much quicker to update and easier to manage than previous methods,
 you can install scoop from <https://scoop.sh/>.
 
@@ -81,7 +79,8 @@ docker run --tty --volume /local/path/to/tf:/tf jameswoolfenden/stevedore scan -
 
 ### Directory scan
 
-This will look for the .github/workflow folder and update all the files it finds there, and display a diff of the changes made to each file:
+This will look for the .github/workflow folder and update all the files it finds
+there, and display a diff of the changes made to each file:
 
 ```bash
 $stevedore label -d .
@@ -132,4 +131,4 @@ Make build
 
 ## Extending
 
-Log an issue, a pr or send an email to jim.wolf @ duck.com.
+Log an issue, a pr or email jim.wolf @ duck.com.

@@ -1,6 +1,7 @@
 package stevedore
 
 import (
+	"os/user"
 	"strconv"
 	"strings"
 
@@ -15,6 +16,8 @@ func Label(result *parser.Result) string {
 
 	var layer int64
 	layer = 0
+
+	myUser, err := user.Current()
 
 	for _, child := range result.AST.Children {
 		endLine = child.EndLine
@@ -40,7 +43,13 @@ func Label(result *parser.Result) string {
 		}
 
 		if strings.Contains(child.Value, "LABEL") {
-			child.Original += " layer." + strconv.FormatInt(layer, 10) + ".author = \"JamesWoolfenden\""
+
+			if err != nil {
+				continue
+			}
+
+			child.Original += " layer." + strconv.FormatInt(layer, 10) +
+				".author = " + "\"" + myUser.Name + "\""
 			label = child
 
 			continue
@@ -50,7 +59,8 @@ func Label(result *parser.Result) string {
 	if label == nil {
 		var newLabel parser.Node
 		newLabel.Value = "LABEL"
-		newLabel.Original = "LABEL layer." + strconv.FormatInt(layer, 10) + ".author = \"JamesWoolfenden\""
+		newLabel.Original = "LABEL layer." + strconv.FormatInt(layer, 10) +
+			".author =" + "\"" + myUser.Name + "\""
 		newLabel.StartLine = endLine + 1
 		newLabel.EndLine = endLine + 1
 

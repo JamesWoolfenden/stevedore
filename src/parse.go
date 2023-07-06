@@ -76,9 +76,21 @@ func GetParentLabels(from string, version string, token string) (map[string]inte
 		return nil, fmt.Errorf("marshalling fail %w", err)
 	}
 
-	history := parentContainer["history"].([]interface{})
-	temp := history[0].(map[string]interface{})
-	previous := temp["v1Compatibility"].(string)
+	history, ok := parentContainer["history"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("history entry no in parent container")
+	}
+
+	temp, ok := history[0].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("history entry not is not map[string]interface{}")
+	}
+
+	previous, ok := temp["v1Compatibility"].(string)
+	if !ok {
+		return nil, fmt.Errorf("v1Compatibility cannot be a string")
+	}
+
 	parent := make(map[string]interface{})
 	err = json.Unmarshal([]byte(previous), &parent)
 
@@ -123,9 +135,9 @@ func ParseFile(file string) (*parser.Result, error) {
 	return result, err
 }
 
-func ParseAll(file *string, directory string) error {
+func ParseAll(file *string, directory string, output string) error {
 	if file != nil {
-		err2 := Parse(file)
+		err2 := Parse(file, output)
 		if err2 != nil {
 			return err2
 		}
@@ -137,7 +149,7 @@ func ParseAll(file *string, directory string) error {
 				}
 
 				if !info.IsDir() && strings.Contains(info.Name(), "Dockerfile") {
-					err2 := Parse(&path)
+					err2 := Parse(&path, output)
 					if err2 != nil {
 						return err2
 					}
@@ -153,7 +165,7 @@ func ParseAll(file *string, directory string) error {
 	return nil
 }
 
-func Parse(file *string) error {
+func Parse(file *string, output string) error {
 	result, err := ParseFile(*file)
 
 	if err != nil {
@@ -161,12 +173,14 @@ func Parse(file *string) error {
 	}
 
 	dump := Label(result)
+	fileOut := filepath.Join(output, filepath.Base(*file))
 
-	err = os.WriteFile("Dockerfile", []byte(dump), 0644)
+	err = os.WriteFile(fileOut, []byte(dump), 0644)
 	if err != nil {
 		return fmt.Errorf("writefile error: %w", err)
 	}
 
 	log.Info().Msgf("updated: %s", "Dockerfile")
+
 	return nil
 }

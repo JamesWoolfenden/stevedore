@@ -1,16 +1,20 @@
-package stevedore
+package stevedore_test
 
 import (
 	"reflect"
+	stevedore "stevedore/src"
 	"testing"
 
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 )
 
 func TestGetDockerLabels(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		from string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -19,11 +23,15 @@ func TestGetDockerLabels(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetDockerLabels(tt.args.from)
+			t.Parallel()
+			got, err := stevedore.GetDockerLabels(tt.args.from)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetDockerLabels() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
@@ -34,11 +42,14 @@ func TestGetDockerLabels(t *testing.T) {
 }
 
 func TestGetParentLabels(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		from    string
 		version string
 		token   string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -47,11 +58,15 @@ func TestGetParentLabels(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetParentLabels(tt.args.from, tt.args.version, tt.args.token)
+			t.Parallel()
+			got, err := stevedore.GetParentLabels(tt.args.from, tt.args.version, tt.args.token)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetParentLabels() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
@@ -62,9 +77,13 @@ func TestGetParentLabels(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
-		file *string
+		file   *string
+		output string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -72,9 +91,12 @@ func TestParse(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Parse(tt.args.file); (err != nil) != tt.wantErr {
+			t.Parallel()
+			if err := stevedore.Parse(tt.args.file, tt.args.output); (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -82,10 +104,14 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseAll(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		file      *string
 		directory string
+		output    string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -93,9 +119,12 @@ func TestParseAll(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			if err := ParseAll(tt.args.file, tt.args.directory); (err != nil) != tt.wantErr {
+			t.Parallel()
+			if err := stevedore.ParseAll(tt.args.file, tt.args.directory, tt.args.output); (err != nil) != tt.wantErr {
 				t.Errorf("ParseAll() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -103,9 +132,12 @@ func TestParseAll(t *testing.T) {
 }
 
 func TestParseFile(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		file string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -114,11 +146,15 @@ func TestParseFile(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseFile(tt.args.file)
+			t.Parallel()
+			got, err := stevedore.ParseFile(tt.args.file)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseFile() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {

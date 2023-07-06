@@ -10,13 +10,15 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	cli "github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	var file *string
+
+	var output string
 
 	var directory string
 
@@ -41,7 +43,8 @@ func main() {
 				Usage:     "Updates Dockerfiles labels",
 				UsageText: "stevedore label",
 				Action: func(*cli.Context) error {
-					err := stevedore.ParseAll(file, directory)
+					err := stevedore.ParseAll(file, directory, output)
+
 					return err
 				},
 				Flags: []cli.Flag{
@@ -58,6 +61,14 @@ func main() {
 						Usage:       "Destination to update Dockerfiles",
 						Value:       ".",
 						Destination: &directory,
+						Category:    "files",
+					},
+					&cli.StringFlag{
+						Name:        "output",
+						Aliases:     []string{"o"},
+						Usage:       "Destination for updated Dockerfiles",
+						Value:       ".",
+						Destination: &output,
 						Category:    "files",
 					},
 				},
