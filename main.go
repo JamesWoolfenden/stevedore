@@ -16,7 +16,7 @@ import (
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	var file string
+	var file *string
 
 	var directory string
 
@@ -41,7 +41,7 @@ func main() {
 				Usage:     "Updates Dockerfiles labels",
 				UsageText: "stevedore label",
 				Action: func(*cli.Context) error {
-					err := stevedore.Parse()
+					err := stevedore.ParseAll(file, directory)
 					return err
 				},
 				Flags: []cli.Flag{
@@ -49,7 +49,7 @@ func main() {
 						Name:        "file",
 						Aliases:     []string{"f"},
 						Usage:       "Dockerfile to parse",
-						Destination: &file,
+						Destination: file,
 						Category:    "files",
 					},
 					&cli.StringFlag{

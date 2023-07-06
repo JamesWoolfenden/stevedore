@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
@@ -122,12 +123,41 @@ func ParseFile(file string) (*parser.Result, error) {
 	return result, err
 }
 
-func Parse() error {
-	file := "./examples/with/Dockerfile"
-	result, err := ParseFile(file)
+func ParseAll(file *string, directory string) error {
+	if file != nil {
+		err2 := Parse(file)
+		if err2 != nil {
+			return err2
+		}
+	} else {
+		err := filepath.Walk(directory,
+			func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+
+				if !info.IsDir() && strings.Contains(info.Name(), "Dockerfile") {
+					err2 := Parse(&path)
+					if err2 != nil {
+						return err2
+					}
+				}
+
+				return nil
+			})
+		if err != nil {
+			return fmt.Errorf("walk path failed %w", err)
+		}
+	}
+
+	return nil
+}
+
+func Parse(file *string) error {
+	result, err := ParseFile(*file)
 
 	if err != nil {
-		return fmt.Errorf("failed to parse file %w", err)
+		return fmt.Errorf("failed to parse: %w", err)
 	}
 
 	dump := Label(result)
@@ -138,6 +168,5 @@ func Parse() error {
 	}
 
 	log.Info().Msgf("updated: %s", "Dockerfile")
-
 	return nil
 }
