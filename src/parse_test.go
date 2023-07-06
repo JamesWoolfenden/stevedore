@@ -62,15 +62,40 @@ func TestGetParentLabels(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	type args struct {
+		file *string
+	}
 	tests := []struct {
 		name    string
+		args    args
 		wantErr bool
 	}{
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := ParseAll(); (err != nil) != tt.wantErr {
+			if err := Parse(tt.args.file); (err != nil) != tt.wantErr {
+				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestParseAll(t *testing.T) {
+	type args struct {
+		file      *string
+		directory string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ParseAll(tt.args.file, tt.args.directory); (err != nil) != tt.wantErr {
 				t.Errorf("ParseAll() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
