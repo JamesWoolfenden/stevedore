@@ -19,7 +19,9 @@ func TestGetAuthToken(t *testing.T) {
 		wantErr bool
 	}{
 		{"this", args{"jameswoolfenden/stevedore"}, "anything", false},
-		{"rubbish", args{"jameswoolfenden/notarepo"}, "", true},
+		{"rubbish", args{"jameswoolfenden/notarepo"}, "anything", false},
+		{"rubbish", args{"bridgecrewio/notarepo"}, "anything", false},
+		{"rubbish", args{"notauser/guff"}, "anything", false},
 	}
 
 	for _, tt := range tests {
@@ -32,10 +34,17 @@ func TestGetAuthToken(t *testing.T) {
 
 				return
 			}
+
 			if got != "" {
-				if tt.want != "" {
-					t.Errorf("GetAuthToken() got = %v, want %v", got, tt.want)
+				if tt.want == "" {
+					t.Errorf("GetAuthToken() want should not be empty")
 				}
+
+				return
+			}
+
+			if tt.want != "" {
+				t.Errorf("GetAuthToken() want should be empty")
 			}
 
 		})

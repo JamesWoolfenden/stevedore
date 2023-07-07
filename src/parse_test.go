@@ -15,13 +15,21 @@ func TestGetDockerLabels(t *testing.T) {
 		from string
 	}
 
+	pass := map[string]interface{}{
+		"layer.0.author": "JamesWoolfenden",
+	}
+
+	empty := make(map[string]interface{})
+
 	tests := []struct {
 		name    string
 		args    args
 		want    map[string]interface{}
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"Pass", args{"jameswoolfenden/ghat"}, pass, false},
+		{"Fail", args{"jameswoolfenden/guff"}, nil, true},
+		{"library", args{"alpine"}, empty, false},
 	}
 
 	for _, tt := range tests {
