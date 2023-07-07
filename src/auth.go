@@ -40,5 +40,9 @@ func GetAuthToken(from string) (string, error) {
 		return "", fmt.Errorf("failed to assert %s", jsonMap["token"])
 	}
 
+	if token == "" {
+		return token, fmt.Errorf("token not retrieved")
+	}
+
 	return token, nil
 }

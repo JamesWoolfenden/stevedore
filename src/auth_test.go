@@ -18,7 +18,8 @@ func TestGetAuthToken(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"this", args{"jameswoolfenden/stevedore"}, "anything", false},
+		{"rubbish", args{"jameswoolfenden/notarepo"}, "", true},
 	}
 
 	for _, tt := range tests {
@@ -31,9 +32,12 @@ func TestGetAuthToken(t *testing.T) {
 
 				return
 			}
-			if got != tt.want {
-				t.Errorf("GetAuthToken() got = %v, want %v", got, tt.want)
+			if got != "" {
+				if tt.want != "" {
+					t.Errorf("GetAuthToken() got = %v, want %v", got, tt.want)
+				}
 			}
+
 		})
 	}
 }
