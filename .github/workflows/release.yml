@@ -68,5 +68,5 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           repository: jameswoolfenden/scoop
-          event-type: ghat
+          event-type: stevedore
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
