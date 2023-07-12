@@ -3,6 +3,7 @@ module stevedore
 go 1.20
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/moby/buildkit v0.11.6
 	github.com/rs/zerolog v1.29.1
 	github.com/urfave/cli/v2 v2.25.7

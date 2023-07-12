@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 	"github.com/rs/zerolog/log"
 )
@@ -17,7 +18,7 @@ func Label(result *parser.Result) string {
 	var layer int64
 	layer = 0
 
-	myUser, err := user.Current()
+	myUser, _ := user.Current()
 
 	for _, child := range result.AST.Children {
 		endLine = child.EndLine
@@ -43,30 +44,15 @@ func Label(result *parser.Result) string {
 		}
 
 		if strings.Contains(child.Value, "LABEL") {
-
-			if err != nil {
-				continue
-			}
-
-			child.Original += " layer." + strconv.FormatInt(layer, 10) +
-				".author = " + "\"" + myUser.Name + "\""
-			label = child
-
-			continue
+			label = MakeLabel(child, layer, myUser, endLine)
 		}
 	}
 
 	if label == nil {
 		var newLabel parser.Node
-		newLabel.Value = "LABEL"
-		newLabel.Original = "LABEL layer." + strconv.FormatInt(layer, 10) +
-			".author =" + "\"" + myUser.Name + "\""
-		newLabel.StartLine = endLine + 1
-		newLabel.EndLine = endLine + 1
+		MakeLabel(&newLabel, layer, myUser, endLine)
 
-		var child parser.Node
-
-		result.AST.AddChild(&child, newLabel.StartLine, newLabel.StartLine)
+		//result.AST.AddChild(child, newLabel.StartLine, newLabel.StartLine)
 		result.AST.Children = append(result.AST.Children, &newLabel)
 	}
 
@@ -77,4 +63,23 @@ func Label(result *parser.Result) string {
 	}
 
 	return dump
+}
+
+func MakeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int) *parser.Node {
+
+	myLayer := " layer." + strconv.FormatInt(layer, 10)
+	if strings.Contains(child.Value, "LABEL") {
+		child.Original = child.Original + myLayer +
+			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".id=\"" + uuid.NewString() + "\""
+	} else {
+		child.Original = "LABEL" + myLayer +
+			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".id=\"" + uuid.NewString() + "\""
+	}
+
+	child.Original += myLayer + ".tool=\"stevedore\""
+	child.StartLine = endLine + 1
+	child.EndLine = endLine + 1
+
+	log.Info().Msgf(child.Original)
+	return child
 }
