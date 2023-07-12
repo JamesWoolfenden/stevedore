@@ -11,7 +11,7 @@ fi
 flags=""
 
 echo "running command:"
-echo ghat swot -f "$INPUT_FILE" "$flags"
+echo stevedore label -f "$INPUT_FILE" "$flags"
 
 /usr/bin/stevedore label -f "$INPUT_FILE" "$flags"
 export stevedore_EXIT_CODE=$?

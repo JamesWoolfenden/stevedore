@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Label(result *parser.Result) string {
+func Label(result *parser.Result, file *string) string {
 	var label *parser.Node
 
 	var endLine int
@@ -44,15 +44,15 @@ func Label(result *parser.Result) string {
 		}
 
 		if strings.Contains(child.Value, "LABEL") {
-			label = MakeLabel(child, layer, myUser, endLine)
+			label = MakeLabel(child, layer, myUser, endLine, file)
 		}
 	}
 
 	if label == nil {
 		var newLabel parser.Node
-		MakeLabel(&newLabel, layer, myUser, endLine)
 
-		//result.AST.AddChild(child, newLabel.StartLine, newLabel.StartLine)
+		MakeLabel(&newLabel, layer, myUser, endLine, file)
+
 		result.AST.Children = append(result.AST.Children, &newLabel)
 	}
 
@@ -65,8 +65,7 @@ func Label(result *parser.Result) string {
 	return dump
 }
 
-func MakeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int) *parser.Node {
-
+func MakeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int, file *string) *parser.Node {
 	myLayer := " layer." + strconv.FormatInt(layer, 10)
 	if strings.Contains(child.Value, "LABEL") {
 		child.Original = child.Original + myLayer +
@@ -80,6 +79,8 @@ func MakeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int) 
 	child.StartLine = endLine + 1
 	child.EndLine = endLine + 1
 
-	log.Info().Msgf(child.Original)
+	log.Info().Msgf("file: " + *file)
+	log.Info().Msgf("label: " + child.Original)
+
 	return child
 }

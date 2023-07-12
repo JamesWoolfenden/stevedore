@@ -68,3 +68,5 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.28.1 h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175w=
 google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+moul.io/banner v1.0.1 h1:+WsemGLhj2pOajw2eR5VYjLhOIqs0XhIRYchzTyMLk0=
+moul.io/banner v1.0.1/go.mod h1:XwvIGKkhKRKyN1vIdmR5oaKQLIkMhkMqrsHpS94QzAU=

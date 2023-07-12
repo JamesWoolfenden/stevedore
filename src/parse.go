@@ -172,7 +172,7 @@ func Parse(file *string, output string) error {
 		return fmt.Errorf("failed to parse: %w", err)
 	}
 
-	dump := Label(result)
+	dump := Label(result, file)
 	fileOut := filepath.Join(output, filepath.Base(*file))
 
 	err = os.WriteFile(fileOut, []byte(dump), 0644)

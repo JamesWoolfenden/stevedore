@@ -7,6 +7,7 @@ require (
 	github.com/moby/buildkit v0.11.6
 	github.com/rs/zerolog v1.29.1
 	github.com/urfave/cli/v2 v2.25.7
+	moul.io/banner v1.0.1
 )
 
 require (

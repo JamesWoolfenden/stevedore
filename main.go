@@ -11,12 +11,16 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	"moul.io/banner"
 )
 
 func main() {
+	fmt.Println(banner.Inline("stevedore"))
+	fmt.Println("version:", version.Version)
+
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	var file *string
+	var file string
 
 	var output string
 
@@ -43,7 +47,12 @@ func main() {
 				Usage:     "Updates Dockerfiles labels",
 				UsageText: "stevedore label",
 				Action: func(*cli.Context) error {
-					err := stevedore.ParseAll(file, directory, output)
+					var err error
+					if file == "" {
+						err = stevedore.ParseAll(nil, directory, output)
+					} else {
+						err = stevedore.ParseAll(&file, directory, output)
+					}
 
 					return err
 				},
@@ -52,7 +61,7 @@ func main() {
 						Name:        "file",
 						Aliases:     []string{"f"},
 						Usage:       "Dockerfile to parse",
-						Destination: file,
+						Destination: &file,
 						Category:    "files",
 					},
 					&cli.StringFlag{
