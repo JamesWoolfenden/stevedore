@@ -1,6 +1,6 @@
 # stevedore
 
-![alt text](stevedore.png "Stevedore")
+![alt text](stevedore.jfif "Stevedore")
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/jameswoolfenden/pike/graphs/commit-activity)
 [![Build Status](https://github.com/JamesWoolfenden/pike/workflows/CI/badge.svg?branch=master)](https://github.com/JamesWoolfenden/pike)
