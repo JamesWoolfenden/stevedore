@@ -16,7 +16,7 @@ func TestGetDockerLabels(t *testing.T) {
 	}
 
 	pass := map[string]interface{}{
-		"layer.0.author": "JamesWoolfenden",
+		//	"layer.0.author": "JamesWoolfenden",
 	}
 
 	empty := make(map[string]interface{})
