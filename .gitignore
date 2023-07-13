@@ -3,3 +3,4 @@ stevedore
 .DS_Store
 *.orig
 stevedore.exe
+dist/
