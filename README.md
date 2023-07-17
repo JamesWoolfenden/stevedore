@@ -92,6 +92,28 @@ $stevedore label -d .
 
 ```bash
 $stevedore label -f Dockerfile
+     _                      _
+ ___| |_  ___ __ __ ___  __| | ___  _ _  ___
+(_-<|  _|/ -_)\ V // -_)/ _` |/ _ \| '_|/ -_)
+/__/ \__|\___| \_/ \___|\__,_|\___/|_|  \___|
+version: 9.9.9
+1:44PM INF opening: Dockerfile
+1:44PM INF file: Dockerfile
+1:44PM INF label: LABEL layer.0.author="James Woolfenden" layer.0.trace="e130a2d2-0fd6-47b5-a32b-52c408e939e4" layer.0.tool="stevedore"
+1:44PM INF updated: Dockerfile
+➜  stevedore git:(main) ✗
+```
+
+The Dockerfile now has labels:
+
+```dockerfile
+FROM alpine
+RUN apk --no-cache add build-base git curl jq bash
+RUN curl -s -k https://api.github.com/repos/JamesWoolfenden/stevedore/releases/latest | jq '.assets[] | select(.name | contains("linux_386")) | select(.content_type | contains("gzip")) | .browser_download_url' -r | awk '{print "curl -L -k " $0 " -o ./stevedore.tar.gz"}' | sh
+RUN tar -xf ./stevedore.tar.gz -C /usr/bin/ && rm ./stevedore.tar.gz && chmod +x /usr/bin/stevedore && echo 'alias stevedore="/usr/bin/stevedore"' >> ~/.bashrc
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+LABEL layer.0.author="James Woolfenden" layer.0.trace="e130a2d2-0fd6-47b5-a32b-52c408e939e4" layer.0.tool="stevedore"
 ```
 
 ## Help

@@ -37,6 +37,8 @@ func TestLabel(t *testing.T) {
 }
 
 func TestMakeLabel(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		child   *parser.Node
 		layer   int64
@@ -44,6 +46,7 @@ func TestMakeLabel(t *testing.T) {
 		endLine int
 		file    *string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -51,9 +54,12 @@ func TestMakeLabel(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			if got := stevedore.MakeLabel(tt.args.child, tt.args.layer, tt.args.myUser, tt.args.endLine, tt.args.file); !reflect.DeepEqual(got, tt.want) {
+			t.Parallel()
+			if got := stevedore.MakeLabel(tt.args.child, tt.args.layer, tt.args.myUser, tt.args.endLine, tt.args.file); !reflect.DeepEqual(got, tt.want) { //nolint:lll
 				t.Errorf("MakeLabel() = %v, want %v", got, tt.want)
 			}
 		})
