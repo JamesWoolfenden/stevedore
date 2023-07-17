@@ -69,10 +69,10 @@ func MakeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int, 
 	myLayer := " layer." + strconv.FormatInt(layer, 10)
 	if strings.Contains(child.Value, "LABEL") {
 		child.Original = child.Original + myLayer +
-			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".id=\"" + uuid.NewString() + "\""
+			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".trace=\"" + uuid.NewString() + "\""
 	} else {
 		child.Original = "LABEL" + myLayer +
-			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".id=\"" + uuid.NewString() + "\""
+			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".trace=\"" + uuid.NewString() + "\""
 	}
 
 	child.Original += myLayer + ".tool=\"stevedore\""
