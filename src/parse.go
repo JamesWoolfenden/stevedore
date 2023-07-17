@@ -34,7 +34,6 @@ func GetDockerLabels(from string) (map[string]interface{}, error) {
 	}
 
 	ParentLabels, err := GetParentLabels(from, version, token)
-
 	if err != nil {
 		return nil, fmt.Errorf("get ParentLabels failed %w", err)
 	}
@@ -51,7 +50,6 @@ func GetParentLabels(from string, version string, token string) (map[string]inte
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	res, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute http query %w", err)
 	}
@@ -64,7 +62,6 @@ func GetParentLabels(from string, version string, token string) (map[string]inte
 	}(res.Body)
 
 	body, err := io.ReadAll(res.Body)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to read body: %w", err)
 	}
@@ -167,7 +164,6 @@ func ParseAll(file *string, directory string, output string) error {
 
 func Parse(file *string, output string) error {
 	result, err := ParseFile(*file)
-
 	if err != nil {
 		return fmt.Errorf("failed to parse: %w", err)
 	}
@@ -175,7 +171,7 @@ func Parse(file *string, output string) error {
 	dump := Label(result, file)
 	fileOut := filepath.Join(output, filepath.Base(*file))
 
-	err = os.WriteFile(fileOut, []byte(dump), 0644)
+	err = os.WriteFile(fileOut, []byte(dump), 0o644)
 	if err != nil {
 		return fmt.Errorf("writefile error: %w", err)
 	}

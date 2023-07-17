@@ -27,7 +27,6 @@ func Label(result *parser.Result, file *string) string {
 			SplitFrom := strings.SplitN(child.Original, "FROM", 2)
 			image := strings.TrimSpace(SplitFrom[1])
 			ParentLabel, err := GetDockerLabels(image)
-
 			if err != nil {
 				log.Info().Msgf("label error: %s", err)
 			}

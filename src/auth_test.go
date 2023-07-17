@@ -47,7 +47,6 @@ func TestGetAuthToken(t *testing.T) {
 			if tt.want != "" {
 				t.Errorf("GetAuthToken() want should be empty")
 			}
-
 		})
 	}
 }
