@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	stevedore "stevedore/src"
-	"stevedore/src/version"
 	"time"
 
+	stevedore "github.com/jameswoolfenden/stevedore/src"
+	"github.com/jameswoolfenden/stevedore/src/version"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
