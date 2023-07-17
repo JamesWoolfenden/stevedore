@@ -2,9 +2,9 @@ package stevedore_test
 
 import (
 	"reflect"
-	stevedore "stevedore/src"
 	"testing"
 
+	stevedore "github.com/jameswoolfenden/stevedore/src"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 )
 

@@ -3,9 +3,9 @@ package stevedore_test
 import (
 	"os/user"
 	"reflect"
-	stevedore "stevedore/src"
 	"testing"
 
+	stevedore "github.com/jameswoolfenden/stevedore/src"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 )
 

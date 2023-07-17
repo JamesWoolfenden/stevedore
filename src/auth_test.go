@@ -1,8 +1,9 @@
 package stevedore_test
 
 import (
-	stevedore "stevedore/src"
 	"testing"
+
+	stevedore "github.com/jameswoolfenden/stevedore/src"
 )
 
 func TestGetAuthToken(t *testing.T) {
