@@ -12,25 +12,35 @@ import (
 func TestLabel(t *testing.T) {
 	t.Parallel()
 
+	file := "../examples/labelled/Dockerfile"
+
+	var empty *parser.Result
+
 	type args struct {
 		result *parser.Result
 		file   *string
 	}
 
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"empty", args{empty, &file}, "", true},
 	}
 
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			if got := stevedore.Label(tt.args.result, tt.args.file); got != tt.want {
-				t.Errorf("Label() = %v, want %v", got, tt.want)
+			got, err := stevedore.Label(tt.args.result, tt.args.file)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Label() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Label() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

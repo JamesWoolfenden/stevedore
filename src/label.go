@@ -1,6 +1,7 @@
 package stevedore
 
 import (
+	"fmt"
 	"os/user"
 	"strconv"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Label(result *parser.Result, file *string) string {
+func Label(result *parser.Result, file *string) (string, error) {
 	var label *parser.Node
 
 	var endLine int
@@ -19,6 +20,10 @@ func Label(result *parser.Result, file *string) string {
 	layer = 0
 
 	myUser, _ := user.Current()
+
+	if result == nil {
+		return "", fmt.Errorf("dockerfile is nil")
+	}
 
 	for _, child := range result.AST.Children {
 		endLine = child.EndLine
@@ -61,7 +66,7 @@ func Label(result *parser.Result, file *string) string {
 		dump += child.Original + "\n"
 	}
 
-	return dump
+	return dump, nil
 }
 
 func MakeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int, file *string) *parser.Node {
