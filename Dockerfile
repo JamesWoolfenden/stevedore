@@ -1,9 +1,7 @@
-FROM alpine
-
-RUN apk --no-cache add build-base git curl jq bash
-RUN curl -s -k https://api.github.com/repos/JamesWoolfenden/stevedore/releases/latest | jq '.assets[] | select(.name | contains("linux_386")) | select(.content_type | contains("gzip")) | .browser_download_url' -r | awk '{print "curl -L -k " $0 " -o ./stevedore.tar.gz"}' | sh
-RUN tar -xf ./stevedore.tar.gz -C /usr/bin/ && rm ./stevedore.tar.gz && chmod +x /usr/bin/stevedore && echo 'alias stevedore="/usr/bin/stevedore"' >> ~/.bashrc
-COPY entrypoint.sh /entrypoint.sh
-
-# Code file to execute when the docker container starts up (`entrypoint.sh`)
-ENTRYPOINT ["/entrypoint.sh"]
+FROM jameswoolfenden/ghat
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+EXPOSE 3000
+LABEL layer.0.author="James Woolfenden" layer.0.trace="202fe899-0eda-4da3-9e17-5d6feef8c46d" layer.0.tool="stevedore" git_repo="stevedore" git_org="JamesWoolfenden" git_file="examples/basic/Dockerfile"git_commit"37321c1fa74d62b2923a697c04c94910b9c210fc"
