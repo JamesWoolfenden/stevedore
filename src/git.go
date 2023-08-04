@@ -86,7 +86,9 @@ func (g *GitService) setOrgAndName() error {
 				return fmt.Errorf("invalid format of endpoint path: %s", endpoint.Path)
 			}
 			g.organization = endpointPathParts[0]
+
 			g.repoName = strings.Join(endpointPathParts[1:], "/")
+
 			break
 		}
 	}
@@ -97,17 +99,22 @@ func (g *GitService) setOrgAndName() error {
 func (g *GitService) ComputeRelativeFilePath(fp string) string {
 	if strings.HasPrefix(fp, g.gitRootDir) {
 		res, _ := filepath.Rel(g.gitRootDir, fp)
+
 		return filepath.Join(g.scanPathFromRoot, res)
 	}
+
 	scanPathIter := g.scanPathFromRoot
 	parent := filepath.Dir(fp)
+
 	for {
 		_, child := filepath.Split(scanPathIter)
 		if parent != child {
 			break
 		}
+
 		scanPathIter, _ = filepath.Split(scanPathIter)
 	}
+
 	return filepath.Join(scanPathIter, fp)
 }
 

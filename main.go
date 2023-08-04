@@ -16,15 +16,12 @@ import (
 
 func main() {
 	fmt.Println(banner.Inline("stevedore"))
+
 	fmt.Println("version:", version.Version)
 
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	var file string
-
-	var output string
-
-	var directory string
+	var content stevedore.Parser
 
 	app := &cli.App{
 		EnableBashCompletion: true,
@@ -48,10 +45,10 @@ func main() {
 				UsageText: "stevedore label",
 				Action: func(*cli.Context) error {
 					var err error
-					if file == "" {
-						err = stevedore.ParseAll(nil, directory, output)
+					if content.File == nil {
+						err = content.ParseAll()
 					} else {
-						err = stevedore.ParseAll(&file, directory, output)
+						err = content.ParseAll()
 					}
 
 					return err
@@ -61,7 +58,7 @@ func main() {
 						Name:        "file",
 						Aliases:     []string{"f"},
 						Usage:       "Dockerfile to parse",
-						Destination: &file,
+						Destination: content.File,
 						Category:    "files",
 					},
 					&cli.StringFlag{
@@ -69,7 +66,7 @@ func main() {
 						Aliases:     []string{"d"},
 						Usage:       "Destination to update Dockerfiles",
 						Value:       ".",
-						Destination: &directory,
+						Destination: &content.Directory,
 						Category:    "files",
 					},
 					&cli.StringFlag{
@@ -77,7 +74,7 @@ func main() {
 						Aliases:     []string{"o"},
 						Usage:       "Destination for updated Dockerfiles",
 						Value:       ".",
-						Destination: &output,
+						Destination: &content.Output,
 						Category:    "files",
 					},
 				},
