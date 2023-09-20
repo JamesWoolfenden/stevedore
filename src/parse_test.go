@@ -7,20 +7,28 @@ import (
 )
 
 func TestParser_Parse(t *testing.T) {
+	t.Parallel()
+
+	file := "../examples/basic/Dockerfile"
+
 	type fields struct {
 		File      *string
 		Output    string
 		Directory string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"Pass", fields{&file, "", ""}, false},
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			content := &stevedore.Parser{
 				File:      tt.fields.File,
 				Output:    tt.fields.Output,
@@ -34,11 +42,14 @@ func TestParser_Parse(t *testing.T) {
 }
 
 func TestParser_ParseAll(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		File      *string
 		Output    string
 		Directory string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -46,8 +57,11 @@ func TestParser_ParseAll(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			content := &stevedore.Parser{
 				File:      tt.fields.File,
 				Output:    tt.fields.Output,

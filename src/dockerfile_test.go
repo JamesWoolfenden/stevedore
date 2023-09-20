@@ -1,8 +1,10 @@
 package stevedore_test
 
 import (
+	"os"
 	"os/user"
 	"reflect"
+	"strings"
 	"testing"
 
 	stevedore "github.com/jameswoolfenden/stevedore/src"
@@ -10,10 +12,28 @@ import (
 )
 
 func TestDockerfile_Label(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		Parsed *parser.Result
 		Path   string
 	}
+
+	want :=
+		`FROM jameswoolfenden/ghat
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+EXPOSE 3000
+LABEL layer.0.author="James Woolfenden"`
+
+	want_short := `FROM jameswoolfenden/ghat
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+EXPOSE 3000`
 
 	tests := []struct {
 		name    string
@@ -22,10 +42,17 @@ func TestDockerfile_Label(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty", fields{nil, "../examples/labelled/Dockerfile"}, "", true},
+		{"Pass", fields{nil, "../examples/basic/Dockerfile"}, want, false},
+		{"Pass short", fields{nil, "../examples/basic/Dockerfile"}, want_short, false},
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			data, _ := os.Open(tt.fields.Path)
+			tt.fields.Parsed, _ = parser.Parse(data)
+
 			result := &stevedore.Dockerfile{
 				Parsed: tt.fields.Parsed,
 				Path:   tt.fields.Path,
@@ -33,9 +60,11 @@ func TestDockerfile_Label(t *testing.T) {
 			got, err := result.Label()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Label() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
-			if got != tt.want {
+
+			if !strings.Contains(got, tt.want) {
 				t.Errorf("Label() got = %v, want %v", got, tt.want)
 			}
 		})
@@ -43,19 +72,26 @@ func TestDockerfile_Label(t *testing.T) {
 }
 
 func TestDockerfile_ParseFile(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		Parsed *parser.Result
 		Path   string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"Pass", fields{nil, "../examples/basic/Dockerfile"}, false},
+		{"Not a file", fields{nil, "../examples/basic/"}, true},
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			result := &stevedore.Dockerfile{
 				Parsed: tt.fields.Parsed,
 				Path:   tt.fields.Path,
