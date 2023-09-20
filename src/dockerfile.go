@@ -44,7 +44,7 @@ func (result *Dockerfile) ParseFile() error {
 	return err
 }
 
-func (result *Dockerfile) Label() (string, error) {
+func (result *Dockerfile) Label(Author string) (string, error) {
 	var label *parser.Node
 
 	var endLine int
@@ -53,6 +53,9 @@ func (result *Dockerfile) Label() (string, error) {
 	layer = 0
 
 	myUser, _ := user.Current()
+	if Author != "" {
+		myUser.Username = Author
+	}
 
 	if result.Parsed == nil {
 		return "", fmt.Errorf("dockerfile is nil")

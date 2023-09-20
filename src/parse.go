@@ -13,6 +13,7 @@ type Parser struct {
 	File      *string
 	Output    string
 	Directory string
+	Author    string
 }
 
 func (content *Parser) ParseAll() error {
@@ -55,7 +56,7 @@ func (content *Parser) Parse() error {
 		return fmt.Errorf("failed to parse: %w", err)
 	}
 
-	dump, err := Parse.Label()
+	dump, err := Parse.Label(content.Author)
 	if err != nil {
 		return err
 	}

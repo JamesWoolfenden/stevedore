@@ -18,6 +18,7 @@ func TestDockerfile_Label(t *testing.T) {
 	type fields struct {
 		Parsed *parser.Result
 		Path   string
+		Author string
 	}
 
 	want :=
@@ -29,7 +30,8 @@ CMD ["node", "src/index.js"]
 EXPOSE 3000
 LABEL layer.0.author="James Woolfenden"`
 
-	want_short := `FROM jameswoolfenden/ghat
+	want_short :=
+		`FROM jameswoolfenden/ghat
 WORKDIR /app
 COPY . .
 RUN yarn install --production
@@ -42,9 +44,9 @@ EXPOSE 3000`
 		want    string
 		wantErr bool
 	}{
-		{"empty", fields{nil, "../examples/labelled/Dockerfile"}, "", true},
-		{"Pass", fields{nil, "../examples/basic/Dockerfile"}, want, false},
-		{"Pass short", fields{nil, "../examples/basic/Dockerfile"}, want_short, false},
+		{name: "empty", fields: fields{Parsed: nil, Path: "../examples/labelled/Dockerfile", Author: "James Woolfenden"}, wantErr: true},
+		{"Pass", fields{Parsed: nil, Path: "../examples/basic/Dockerfile", Author: "James Woolfenden"}, want, false},
+		{"Pass short", fields{Parsed: nil, Path: "../examples/basic/Dockerfile", Author: "James Woolfenden"}, want_short, false},
 	}
 
 	for _, tt := range tests {
@@ -58,7 +60,7 @@ EXPOSE 3000`
 				Parsed: tt.fields.Parsed,
 				Path:   tt.fields.Path,
 			}
-			got, err := result.Label()
+			got, err := result.Label(tt.fields.Author)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Label() error = %v, wantErr %v", err, tt.wantErr)
 
