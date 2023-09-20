@@ -9,6 +9,7 @@ import (
 
 	stevedore "github.com/jameswoolfenden/stevedore/src"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 func TestDockerfile_Label(t *testing.T) {
@@ -64,8 +65,11 @@ EXPOSE 3000`
 				return
 			}
 
+			dmp := diffmatchpatch.New()
+			diffs := dmp.DiffMain(got, tt.want, false)
+
 			if !strings.Contains(got, tt.want) {
-				t.Errorf("Label() got = %v, want %v", got, tt.want)
+				t.Errorf(dmp.DiffPrettyText(diffs))
 			}
 		})
 	}
