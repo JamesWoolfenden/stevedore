@@ -45,7 +45,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@219613003b08f4d049f34cb56c92e84345e1bb3f # v5
         with:
-          name: jameswoolfenden/ghat
+          name: jameswoolfenden/stevedore
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           tags: "latest,${{ github.ref_name }}"
@@ -54,7 +54,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: jameswoolfenden/ghat
+          repository: jameswoolfenden/stevedore
           short-description: ${{ github.event.repository.description }}
           readme-filepath: ./README.md
   update-scoop:
