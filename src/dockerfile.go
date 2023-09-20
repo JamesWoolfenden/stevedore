@@ -54,7 +54,7 @@ func (result *Dockerfile) Label(Author string) (string, error) {
 
 	myUser, _ := user.Current()
 	if Author != "" {
-		myUser.Username = Author
+		myUser.Name = Author
 	}
 
 	if result.Parsed == nil {

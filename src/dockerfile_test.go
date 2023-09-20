@@ -109,31 +109,8 @@ func TestDockerfile_ParseFile(t *testing.T) {
 	}
 }
 
-func TestMakeLabel(t *testing.T) {
-	type args struct {
-		child   *parser.Node
-		layer   int64
-		myUser  *user.User
-		endLine int
-		file    *string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *parser.Node
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := stevedore.MakeLabel(tt.args.child, tt.args.layer, tt.args.myUser, tt.args.endLine, tt.args.file); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MakeLabel() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestDockerfile_GetDockerLabels(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Parsed *parser.Result
 		Path   string
@@ -154,8 +131,11 @@ func TestDockerfile_GetDockerLabels(t *testing.T) {
 		{"Fail", fields{nil, "", "jameswoolfenden/guff"}, nil, true},
 		{"library", fields{nil, "", "alpine"}, empty, false},
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			result := &stevedore.Dockerfile{
 				Parsed: tt.fields.Parsed,
 				Path:   tt.fields.Path,
@@ -164,10 +144,41 @@ func TestDockerfile_GetDockerLabels(t *testing.T) {
 			got, err := result.GetDockerLabels()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetDockerLabels() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetDockerLabels() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMakeLabel(t *testing.T) {
+	t.Parallel()
+	//myUser, _ := user.Current()
+	//file := "../examples/basic/Dockerfile"
+	type args struct {
+		child   *parser.Node
+		layer   int64
+		myUser  *user.User
+		endLine int
+		file    *string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want *parser.Node
+	}{
+		//{"Pass", args{nil, 0, myUser, 100, &file}, nil},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := stevedore.MakeLabel(tt.args.child, tt.args.layer, tt.args.myUser, tt.args.endLine, tt.args.file); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MakeLabel() = %v, want %v", got, tt.want)
 			}
 		})
 	}
