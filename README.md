@@ -10,6 +10,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![checkov](https://img.shields.io/badge/checkov-verified-brightgreen)](https://www.checkov.io/)
 [![Github All Releases](https://img.shields.io/github/downloads/jameswoolfenden/stevedore/total.svg)](https://github.com/JamesWoolfenden/stevedore/releases)
+[![codecov](https://codecov.io/gh/JamesWoolfenden/stevedore/graph/badge.svg?token=PT5FSJF2U3)](https://codecov.io/gh/JamesWoolfenden/stevedore)
 
 Stevedore manages labels in Dockerfiles and their layers
 

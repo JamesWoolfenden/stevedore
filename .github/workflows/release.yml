@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
         with:
-          go-version: 1.19
+          go-version: 1.21
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@82a020f1f7f605c65dd2449b392a52c3fcfef7ef # v6.0.0
@@ -45,7 +45,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@219613003b08f4d049f34cb56c92e84345e1bb3f # v5
         with:
-          name: jameswoolfenden/ghat
+          name: jameswoolfenden/stevedore
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           tags: "latest,${{ github.ref_name }}"
@@ -54,7 +54,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: jameswoolfenden/ghat
+          repository: jameswoolfenden/stevedore
           short-description: ${{ github.event.repository.description }}
           readme-filepath: ./README.md
   update-scoop:
