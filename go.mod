@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/google/uuid v1.3.1
-	github.com/moby/buildkit v0.12.2
+	github.com/moby/buildkit v0.12.5
 	github.com/rs/zerolog v1.30.0
 	github.com/sergi/go-diff v1.3.1
 	github.com/urfave/cli/v2 v2.25.7
