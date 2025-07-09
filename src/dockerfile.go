@@ -237,7 +237,7 @@ func getParentLabels(from string, version string, token string) (map[string]inte
 
 	history, ok := parentContainer["history"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("history entry no in parent container")
+		return nil, fmt.Errorf("history entry not in parent container")
 	}
 
 	temp, ok := history[0].(map[string]interface{})
