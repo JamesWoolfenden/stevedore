@@ -4,7 +4,7 @@ default_language_version:
   python: python3.11
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-json
       - id: check-merge-conflict
@@ -29,12 +29,12 @@ repos:
     hooks:
       - id: shell-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.45.0
+    rev: v0.47.0
     hooks:
       - id: markdownlint
         exclude: src/testdata|testdata
   - repo: https://github.com/jameswoolfenden/pre-commit
-    rev: v0.1.50
+    rev: v0.1.52
     hooks:
       - id: terraform-fmt
         language_version: python3.11
@@ -51,12 +51,12 @@ repos:
       - id: go-mod-tidy
       - id: go-generate
   - repo: https://github.com/bridgecrewio/checkov
-    rev: 3.2.447
+    rev: 3.2.495
     hooks:
       - id: checkov
         language_version: python3.11
   - repo: https://github.com/jameswoolfenden/ghat
-    rev: v0.1.13
+    rev: v0.1.14
     hooks:
       - id: ghat-go
         name: ghat

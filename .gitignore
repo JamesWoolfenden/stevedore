@@ -4,3 +4,6 @@ stevedore
 *.orig
 stevedore.exe
 dist/
+src/Dockerfile
+manifest-list.json
+manifest.json

@@ -1,0 +1,43 @@
+# Directories
+tools/
+terraform/
+_auth/
+bin/
+.cache/
+node_modules/
+
+# Version control
+.git/
+.github/
+.gitlab/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+docs/
+scripts/
+
+# Test files
+*_test.go
+testdata/
+
+# Build artifacts
+coverage.out
+coverage.html
+
+# GitLab CI
+.gitlab-ci.yml
+
+# Config files
+.golangci.yml
+staticcheck.conf
+
+# Dotfiles
+.*
+!.dockerignore

@@ -1,14 +1,13 @@
 package stevedore
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-
+	"github.com/jameswoolfenden/stevedore/internal/auth"
+	"github.com/jameswoolfenden/stevedore/internal/dockerfile"
+	"github.com/jameswoolfenden/stevedore/internal/git"
 	"github.com/rs/zerolog/log"
 )
 
+// Parser is a backward compatibility wrapper
 type Parser struct {
 	File      *string
 	Output    string
@@ -16,59 +15,36 @@ type Parser struct {
 	Author    string
 }
 
+// ParseAll processes Dockerfiles - backward compatibility wrapper
 func (content *Parser) ParseAll() error {
-	if content.File != nil {
-		err2 := content.Parse()
-		if err2 != nil {
-			return err2
-		}
-	} else {
-		err := filepath.Walk(content.Directory,
-			func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
+	authService := auth.NewDockerAuth()
 
-				if !info.IsDir() && strings.Contains(info.Name(), "Dockerfile") {
-					file := info.Name()
-					content.File = &file
-					err2 := content.Parse()
-					if err2 != nil {
-						return err2
-					}
-				}
-
-				return nil
-			})
-		if err != nil {
-			return fmt.Errorf("walk path failed %w", err)
-		}
+	var gitService git.Service
+	workDir := content.Directory
+	if content.File != nil && *content.File != "" {
+		workDir = *content.File
 	}
 
-	return nil
+	gitService, err := git.NewGitService(workDir)
+	if err != nil {
+		log.Warn().Err(err).Msg("git service unavailable")
+		gitService = nil
+	}
+
+	labeler := dockerfile.NewLabeler(gitService, authService)
+	parser := dockerfile.NewParser(labeler)
+
+	if content.File != nil {
+		parser.File = *content.File
+	}
+	parser.Directory = content.Directory
+	parser.Output = content.Output
+	parser.Author = content.Author
+
+	return parser.ParseAll()
 }
 
+// Parse processes a single Dockerfile - backward compatibility wrapper
 func (content *Parser) Parse() error {
-	Parse := Dockerfile{nil, *content.File, ""}
-
-	err := Parse.ParseFile()
-	if err != nil {
-		return fmt.Errorf("failed to parse: %w", err)
-	}
-
-	dump, err := Parse.Label(content.Author)
-	if err != nil {
-		return err
-	}
-
-	fileOut := filepath.Join(content.Output, filepath.Base(*content.File))
-
-	err = os.WriteFile(fileOut, []byte(dump), 0o644)
-	if err != nil {
-		return fmt.Errorf("writefile error: %w", err)
-	}
-
-	log.Info().Msgf("updated: %s", "Dockerfile")
-
-	return nil
+	return content.ParseAll()
 }

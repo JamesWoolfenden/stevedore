@@ -1,3 +1,4 @@
+#file: noinspection Annotator,Annotator
 on: pull_request
 name: Pull request
 permissions: read-all
@@ -12,7 +13,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
         with:
-          go-version: 1.23.x
+          go-version: 1.21.x
       - name: Restore cache
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
@@ -21,7 +22,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-mod-
       - name: gofumpt
-        uses: iamnotaturtle/auto-gofmt@3934ab53013ffb44d3db33bbd1c271279b5925d5 # v2.1.0
+        uses: jameswoolfenden/auto-gofmt@99a3ed2b78b6c01d70db1740ba16d3dff60003df # v0.0.3
   test:
     strategy:
       matrix:
@@ -52,4 +53,4 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
         with:
-          go-version: 1.23.x
+          go-version: 1.21.x
