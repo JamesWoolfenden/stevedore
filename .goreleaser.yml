@@ -29,16 +29,15 @@ builds:
 archives:
   - format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
-brews:
+homebrew_casks:
   - name: stevedore
 
     repository:
       owner: JamesWoolfenden
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-
 
     commit_author:
       name: "GitHub Action"
@@ -47,9 +46,3 @@ brews:
     homepage: "https://github.com/JamesWoolfenden/stevedore#readme"
 
     description: "stevedore is a tool for managing Dockerfile labels"
-
-    install: |
-      bin.install "stevedore"
-
-    test: |
-      system "#{bin}/stevedore", "--help"
