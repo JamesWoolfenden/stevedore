@@ -18,7 +18,7 @@ go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 # Linter (if not already installed)
 if ! command -v golangci-lint &> /dev/null; then
     echo "📦 Installing golangci-lint..."
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)"/bin
 fi
 
 # Dependency analysis

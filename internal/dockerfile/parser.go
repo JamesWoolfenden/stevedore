@@ -16,14 +16,14 @@ type Parser struct {
 	Output    string
 	Directory string
 	Author    string
-	labeller   *Labeller
+	labeller  *Labeller
 }
 
 // NewParser creates a new Parser instance
 func NewParser(labeller *Labeller) *Parser {
 	return &Parser{
 		labeller: labeller,
-		Output:  ".",
+		Output:   ".",
 	}
 }
 
