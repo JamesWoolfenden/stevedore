@@ -29,12 +29,12 @@ repos:
     hooks:
       - id: shell-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.48.0
+    rev: v0.45.0
     hooks:
       - id: markdownlint
         exclude: src/testdata|testdata
   - repo: https://github.com/jameswoolfenden/pre-commit
-    rev: v0.1.53
+    rev: v0.1.50
     hooks:
       - id: terraform-fmt
         language_version: python3.11
@@ -51,12 +51,12 @@ repos:
       - id: go-mod-tidy
       - id: go-generate
   - repo: https://github.com/bridgecrewio/checkov
-    rev: 3.2.526
+    rev: 3.2.447
     hooks:
       - id: checkov
         language_version: python3.11
   - repo: https://github.com/jameswoolfenden/ghat
-    rev: v0.1.23
+    rev: v0.1.13
     hooks:
       - id: ghat-go
         name: ghat
@@ -69,6 +69,5 @@ repos:
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
-      - id: validate-toml
       - id: no-go-testing
       - id: go-mod-tidy

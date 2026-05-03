@@ -1,0 +1,73 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Enabled by default
+    - errcheck # Check for unchecked errors
+    - gosimple # Simplify code
+    - govet # Go vet
+    - ineffassign # Detect ineffectual assignments
+    - staticcheck # Advanced static analysis
+    - unused # Detect unused code
+
+    # Security
+    - gosec # Security problems
+
+    # Code quality
+    - gocyclo # Cyclomatic complexity
+    - goimports # Import formatting
+    - misspell # Spelling errors
+    - revive # Fast, configurable linter
+    - unconvert # Remove unnecessary type conversions
+    - unparam # Unused function parameters
+
+    # Best practices
+    - errname # Error naming conventions
+    - errorlint # Error wrapping
+    - exportloopref # Loop variable reference issues
+    - nilerr # Nil error returns
+    - nilnil # Nil nil returns
+
+    # Performance
+    - prealloc # Slice preallocation
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+
+  gosec:
+    excludes:
+      - G104 # Audit errors not checked (too noisy, use errcheck)
+
+  revive:
+    rules:
+      - name: exported
+        disabled: true # Too strict for internal packages
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    # Exclude some linters from test files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - gosec
+        - errcheck
+
+    # Exclude generated files
+    - path: generated_.*\.go
+      linters:
+        - all
+
+    # Exclude certain gosec rules that are too noisy
+    - linters:
+        - gosec
+      text: "G404:" # Use of weak random number generator (crypto/rand vs math/rand)

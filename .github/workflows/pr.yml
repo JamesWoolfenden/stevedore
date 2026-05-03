@@ -1,3 +1,4 @@
+#file: noinspection Annotator,Annotator
 on: pull_request
 name: Pull request
 permissions: read-all
@@ -12,7 +13,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: 1.25.9
+          go-version: 1.25.x
       - name: Restore cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
@@ -23,7 +24,7 @@ jobs:
       - name: gofumpt
         env:
           GOTOOLCHAIN: auto
-        uses: jameswoolfenden/auto-gofmt@966e6b689d24eeb2fb32d4900ed06f80b536c861 # v0.1
+        uses: iamnotaturtle/auto-gofmt@3934ab53013ffb44d3db33bbd1c271279b5925d5 # v2.1.0
       - name: golangci-lint
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
@@ -64,3 +65,4 @@ jobs:
         run: go build ./...
       - name: Test
         run: go test ./... -coverprofile=./cover.out
+          go-version: 1.23.x

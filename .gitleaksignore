@@ -1,0 +1,5 @@
+# Gitleaks ignore file
+# Documentation examples with placeholder passwords
+
+README.md:connection-string:70
+README.md:connection-string:217

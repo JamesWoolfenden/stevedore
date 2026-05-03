@@ -1,11 +1,19 @@
 # .goreleaser.yml
 
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
 before:
   hooks:
     - ./set-version.sh
 
 builds:
-  - goos:
+  - main: ./cmd/stevedore
+    goos:
       - darwin
       - linux
       - windows
@@ -21,16 +29,15 @@ builds:
 archives:
   - format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
-brews:
+homebrew_casks:
   - name: stevedore
 
     repository:
       owner: JamesWoolfenden
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-
 
     commit_author:
       name: "GitHub Action"
@@ -39,9 +46,3 @@ brews:
     homepage: "https://github.com/JamesWoolfenden/stevedore#readme"
 
     description: "stevedore is a tool for managing Dockerfile labels"
-
-    install: |
-      bin.install "stevedore"
-
-    test: |
-      system "#{bin}/stevedore", "--help"

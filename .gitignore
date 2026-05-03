@@ -1,6 +1,9 @@
-stevedore
+/stevedore
 .idea/
 .DS_Store
 *.orig
 stevedore.exe
 dist/
+src/Dockerfile
+manifest-list.json
+manifest.json
