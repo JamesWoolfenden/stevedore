@@ -24,7 +24,7 @@ jobs:
       - name: gofumpt
         env:
           GOTOOLCHAIN: auto
-        uses: JamesWoolfenden/auto-gofmt@de36c00b3eef35c5ed321296a11ca3c772da494b # v0.33934ab53013ffb44d3db33bbd1c271279b5925d5 # v2.1.0
+        uses: JamesWoolfenden/auto-gofmt@658e0ca3f44450eb0229a26371b1432db51059a7 # v0.4.0
       - name: golangci-lint
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
@@ -65,4 +65,3 @@ jobs:
         run: go build ./...
       - name: Test
         run: go test ./... -coverprofile=./cover.out
-          go-version: 1.23.x

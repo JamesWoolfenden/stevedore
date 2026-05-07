@@ -13,6 +13,13 @@ before:
 
 builds:
   - main: ./cmd/stevedore
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+    mod_timestamp: "{{ .CommitTimestamp }}"
     goos:
       - darwin
       - linux
@@ -26,23 +33,49 @@ builds:
     ignore:
       - goarch: "386"
         goos: darwin
+
 archives:
   - format_overrides:
       - goos: windows
         formats: [zip]
 
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+sboms:
+  - artifacts: archive
+
+signs:
+  - artifacts: checksum
+    stdin: "{{ .Env.PASSPHRASE }}"
+    args:
+      - "--batch"
+      - "--pinentry-mode"
+      - "loopback"
+      - "--passphrase-fd"
+      - "0"
+      - "-u"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
 homebrew_casks:
   - name: stevedore
-
     repository:
       owner: JamesWoolfenden
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-
     commit_author:
       name: "GitHub Action"
       email: action@github.com
-
     homepage: "https://github.com/JamesWoolfenden/stevedore#readme"
-
     description: "stevedore is a tool for managing Dockerfile labels"
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/stevedore"]
+          end
