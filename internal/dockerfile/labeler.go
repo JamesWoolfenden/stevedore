@@ -256,11 +256,11 @@ func (l *Labeller) getParentLabels(image, version, token string) (map[string]int
 	history, ok := parentContainer["history"].([]interface{})
 	if !ok {
 		log.Debug().Msg("no history entry in parent container")
-		return nil, nil
+		return map[string]interface{}{}, nil
 	}
 
 	if len(history) == 0 {
-		return nil, nil
+		return map[string]interface{}{}, nil
 	}
 
 	temp, ok := history[0].(map[string]interface{})
@@ -271,7 +271,7 @@ func (l *Labeller) getParentLabels(image, version, token string) (map[string]int
 	previous, ok := temp["v1Compatibility"].(string)
 	if !ok {
 		log.Debug().Msg("no v1Compatibility in history")
-		return nil, nil
+		return map[string]interface{}{}, nil
 	}
 
 	var parent map[string]interface{}
@@ -282,13 +282,13 @@ func (l *Labeller) getParentLabels(image, version, token string) (map[string]int
 	config, ok := parent["container_config"].(map[string]interface{})
 	if !ok {
 		log.Debug().Msg("no container_config in parent")
-		return nil, nil
+		return map[string]interface{}{}, nil
 	}
 
 	parentLabels, ok := config["Labels"].(map[string]interface{})
 	if !ok {
 		log.Debug().Msg("no labels in container_config")
-		return nil, nil
+		return map[string]interface{}{}, nil
 	}
 
 	return parentLabels, nil
