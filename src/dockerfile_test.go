@@ -25,7 +25,7 @@ func TestDockerfile_Label(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to read fixture: %v", err)
 	}
-	wantShort := strings.TrimRight(string(fixture), "\n")
+	wantShort := strings.TrimRight(strings.ReplaceAll(string(fixture), "\r\n", "\n"), "\n")
 	want := wantShort + "\n" + `LABEL layer.0.author="James Woolfenden"`
 
 	tests := []struct {

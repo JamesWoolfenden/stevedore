@@ -1,6 +1,6 @@
 module github.com/jameswoolfenden/stevedore
 
-go 1.25.9
+go 1.25.10
 
 require (
 	github.com/go-git/go-git/v5 v5.18.0
