@@ -21,22 +21,12 @@ func TestDockerfile_Label(t *testing.T) {
 		Author string
 	}
 
-	want :=
-		`FROM jameswoolfenden/ghat
-WORKDIR /app
-COPY . .
-RUN yarn install --production
-CMD ["node", "src/index.js"]
-EXPOSE 3000
-LABEL layer.0.author="James Woolfenden"`
-
-	wantShort :=
-		`FROM jameswoolfenden/ghat
-WORKDIR /app
-COPY . .
-RUN yarn install --production
-CMD ["node", "src/index.js"]
-EXPOSE 3000`
+	fixture, err := os.ReadFile("../examples/basic/Dockerfile")
+	if err != nil {
+		t.Fatalf("failed to read fixture: %v", err)
+	}
+	wantShort := strings.TrimRight(string(fixture), "\n")
+	want := wantShort + "\n" + `LABEL layer.0.author="James Woolfenden"`
 
 	tests := []struct {
 		name    string
