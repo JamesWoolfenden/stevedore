@@ -9,7 +9,7 @@ version: 2
 
 before:
   hooks:
-    - ./set-version.sh
+    - go mod tidy
 
 builds:
   - main: ./cmd/stevedore
@@ -18,7 +18,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -s -w
+      - -s -w -X github.com/jameswoolfenden/stevedore/src/version.Version={{.Version}}
     mod_timestamp: "{{ .CommitTimestamp }}"
     goos:
       - darwin
