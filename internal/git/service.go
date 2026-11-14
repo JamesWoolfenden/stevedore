@@ -93,6 +93,13 @@ func (g *GitService) setOrgAndName() error {
 			return nil
 		}
 
+		// a local path (file endpoint) has no host and so no org/repo to speak of
+		if endpoint.Host == "" {
+			log.Warn().Msgf("origin %q has no host, skipping repo name", cfg.URLs[0])
+
+			return nil
+		}
+
 		// remove leading '/' from path and trailing '.git. suffix, then split by '/'
 		parts := strings.Split(strings.TrimSuffix(strings.TrimLeft(endpoint.Path, "/"), ".git"), "/")
 		if len(parts) < 2 || parts[0] == "" {
