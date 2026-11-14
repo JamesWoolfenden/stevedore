@@ -121,7 +121,8 @@ func TestDockerfile_GetDockerLabels(t *testing.T) {
 	}{
 		{"Pass", fields{nil, "", "jameswoolfenden/ghat"}, pass, false},
 		// Note: Newer Docker manifests don't have v1Compatibility history, so these return nil
-		{"Fail", fields{nil, "", "jameswoolfenden/guff"}, nil, false},
+		// a repository that doesn't exist is an error, not "no labels"
+		{"Fail", fields{nil, "", "jameswoolfenden/guff"}, nil, true},
 		{"library", fields{nil, "", "alpine"}, nil, false},
 	}
 

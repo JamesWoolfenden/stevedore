@@ -17,8 +17,9 @@ import (
 )
 
 func main() {
-	fmt.Println(banner.Inline("stevedore"))
-	fmt.Println("version:", version.Version)
+	// stderr, so "stevedore version" and other output stay clean for scripts
+	fmt.Fprintln(os.Stderr, banner.Inline("stevedore"))
+	fmt.Fprintln(os.Stderr, "version:", version.Version)
 
 	// Initialize configuration
 	cfg := config.NewConfig()

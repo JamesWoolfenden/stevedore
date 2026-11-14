@@ -3,40 +3,27 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
+// DefaultHTTPTimeout is the timeout for calls to the Docker registry
+const DefaultHTTPTimeout = 30 * time.Second
+
 // Config holds the application configuration
 type Config struct {
 	DefaultAuthor string
-	Output        string
 	LogLevel      string
-	HTTPTimeout   time.Duration
 }
 
 // NewConfig creates a new configuration with sensible defaults
 func NewConfig() *Config {
 	return &Config{
 		DefaultAuthor: "",
-		Output:        ".",
 		LogLevel:      "info",
-		HTTPTimeout:   30 * time.Second,
 	}
-}
-
-// Validate performs validation on the configuration
-func (c *Config) Validate() error {
-	if c.Output != "" {
-		if err := validatePath(c.Output); err != nil {
-			return fmt.Errorf("invalid output path: %w", err)
-		}
-	}
-
-	return nil
 }
 
 // SetupLogging configures the logging based on the config
@@ -49,47 +36,18 @@ func (c *Config) SetupLogging() error {
 	}
 
 	zerolog.SetGlobalLevel(level)
-	return nil
-}
-
-// validatePath performs security validation on file paths to prevent path traversal
-func validatePath(path string) error {
-	if path == "" {
-		return nil // Empty path is handled elsewhere
-	}
-
-	cleaned := filepath.Clean(path)
-
-	// Check for path traversal attempts
-	if containsPathTraversal(cleaned) {
-		return fmt.Errorf("path traversal detected in: %s", path)
-	}
 
 	return nil
 }
 
-// containsPathTraversal checks if a path contains path traversal patterns
-func containsPathTraversal(path string) bool {
-	// Normalize the path
-	cleaned := filepath.Clean(path)
-
-	// Check if the cleaned path goes outside of current directory
-	// by checking for leading ".."
-	parts := filepath.SplitList(cleaned)
-	for _, part := range parts {
-		if part == ".." {
-			return true
-		}
-	}
-
-	return false
-}
-
-// ValidateDockerfilePath validates a Dockerfile path for security
+// ValidateDockerfilePath checks that a Dockerfile or directory path was given.
+//
+// It does not reject ".." components: this is a local tool run by the person who
+// owns the files, and "-f ../Dockerfile" is a normal thing to pass.
 func ValidateDockerfilePath(path string) error {
 	if path == "" {
 		return fmt.Errorf("dockerfile path cannot be empty")
 	}
 
-	return validatePath(path)
+	return nil
 }

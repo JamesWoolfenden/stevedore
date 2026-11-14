@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+	neturl "net/url"
 
+	"github.com/jameswoolfenden/stevedore/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,7 +25,7 @@ type dockerAuthService struct {
 func NewDockerAuth() DockerAuth {
 	return &dockerAuthService{
 		client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: config.DefaultHTTPTimeout,
 		},
 	}
 }
@@ -35,7 +36,9 @@ func (d *dockerAuthService) GetAuthToken(image string) (string, error) {
 		return "", err
 	}
 
-	url := "https://auth.docker.io/token?service=registry.docker.io&scope=repository:" + image + ":pull"
+	// escape the scope: an image name must not be able to add query parameters
+	url := "https://auth.docker.io/token?service=registry.docker.io&scope=" +
+		neturl.QueryEscape("repository:"+image+":pull")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create http request: %w", err)

@@ -12,7 +12,6 @@ import (
 	"regexp"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jameswoolfenden/stevedore/internal/auth"
@@ -45,7 +44,7 @@ func NewLabeler(gitService git.Service, authService auth.DockerAuth) *Labeller {
 		gitService:  gitService,
 		authService: authService,
 		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: config.DefaultHTTPTimeout,
 		},
 	}
 }
@@ -236,20 +235,9 @@ func (l *Labeller) gitKeys(filePath string) string {
 
 // GetDockerLabels retrieves labels from a parent Docker image
 func (l *Labeller) GetDockerLabels(dockerfile *Dockerfile) (map[string]interface{}, error) {
-	version := "latest"
-	image := dockerfile.Image
-
-	// Normalize image name
-	splitter := strings.SplitN(image, "/", 2)
-	if len(splitter) < 2 {
-		image = "library/" + image
-	}
-
-	// Extract version if specified
-	splitterVersion := strings.SplitN(image, ":", 2)
-	if len(splitterVersion) == 2 {
-		version = splitterVersion[1]
-		image = splitterVersion[0]
+	image, version, err := splitImage(dockerfile.Image)
+	if err != nil {
+		return nil, err
 	}
 
 	// Get authentication token
@@ -265,6 +253,49 @@ func (l *Labeller) GetDockerLabels(dockerfile *Dockerfile) (map[string]interface
 	}
 
 	return parentLabels, nil
+}
+
+// splitImage breaks an image reference into a Docker Hub repository and a tag or
+// digest. Other registries are rejected, as the token flow here is Docker Hub's.
+func splitImage(ref string) (repo, reference string, err error) {
+	if ref == "" {
+		return "", "", fmt.Errorf("image name cannot be empty")
+	}
+
+	reference = "latest"
+
+	digested := false
+
+	if before, digest, ok := strings.Cut(ref, "@"); ok {
+		ref, reference, digested = before, digest, true
+	}
+
+	// a tag is a colon after the last slash; an earlier colon is a registry port
+	if i := strings.LastIndex(ref, ":"); i > strings.LastIndex(ref, "/") {
+		if !digested {
+			reference = ref[i+1:]
+		}
+
+		ref = ref[:i]
+	}
+
+	first, rest, hasSlash := strings.Cut(ref, "/")
+	if hasSlash && (first == "docker.io" || first == "index.docker.io") {
+		ref, first, hasSlash = rest, "", strings.Contains(rest, "/")
+		if hasSlash {
+			first, _, _ = strings.Cut(rest, "/")
+		}
+	}
+
+	if hasSlash && (strings.ContainsAny(first, ".:") || first == "localhost") {
+		return "", "", fmt.Errorf("unsupported registry %q: only Docker Hub images are supported", first)
+	}
+
+	if !hasSlash {
+		ref = "library/" + ref
+	}
+
+	return ref, reference, nil
 }
 
 // getParentLabels fetches labels from the Docker registry manifest
@@ -295,6 +326,10 @@ func (l *Labeller) getParentLabels(image, version, token string) (map[string]int
 			log.Warn().Err(closeErr).Msg("failed to close http response body")
 		}
 	}()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("registry returned %s for %s", res.Status, url)
+	}
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
