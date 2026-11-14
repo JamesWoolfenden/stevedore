@@ -22,7 +22,8 @@ func TestParser_Parse(t *testing.T) {
 		fields  fields
 		wantErr bool
 	}{
-		{"Pass", fields{&file, "", ""}, false},
+		// an empty Output now means "update in place", which would rewrite the fixture
+		{"Pass", fields{&file, t.TempDir(), ""}, false},
 	}
 
 	for _, tt := range tests {

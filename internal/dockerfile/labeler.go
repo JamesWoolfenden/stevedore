@@ -1,6 +1,7 @@
 package dockerfile
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,7 +9,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"strconv"
+	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -27,6 +29,7 @@ type Dockerfile struct {
 	Parsed *parser.Result
 	Path   string
 	Image  string
+	Raw    []byte // the file as read, kept so labelling can preserve it
 }
 
 // Labeller handles adding labels to Dockerfiles
@@ -53,20 +56,16 @@ func (d *Dockerfile) ParseFile() error {
 		return err
 	}
 
-	data, err := os.Open(d.Path)
+	raw, err := os.ReadFile(d.Path)
 	if err != nil {
 		return fmt.Errorf("failed to open file %s: %w", d.Path, err)
 	}
 
-	defer func() {
-		if closeErr := data.Close(); closeErr != nil {
-			log.Warn().Err(closeErr).Msgf("failed to close file: %s", d.Path)
-		}
-	}()
-
 	log.Info().Msgf("opening: %s", d.Path)
 
-	d.Parsed, err = parser.Parse(data)
+	d.Raw = raw
+
+	d.Parsed, err = parser.Parse(bytes.NewReader(raw))
 	if err != nil {
 		return fmt.Errorf("failed to parse dockerfile: %w", err)
 	}
@@ -74,20 +73,61 @@ func (d *Dockerfile) ParseFile() error {
 	return nil
 }
 
-// Label adds metadata labels to the Dockerfile
+var (
+	// keys stevedore writes itself, and so may rewrite on a later run
+	ownedKeyRe = regexp.MustCompile(`\s+(?:layer\.0\.(?:author|trace|tool)|git_(?:repo|org|file|commit))="(?:[^"\\]|\\.)*"`)
+	traceRe    = regexp.MustCompile(`layer\.0\.trace="((?:[^"\\]|\\.)*)"`)
+	quoter     = strings.NewReplacer(`\`, `\\`, `"`, `\"`)
+)
+
+// quote renders a LABEL value, escaping backslashes and double quotes
+func quote(v string) string {
+	return `"` + quoter.Replace(v) + `"`
+}
+
+// nodeText returns the source lines an AST node spans
+func nodeText(lines []string, n *parser.Node) string {
+	start, end := max(n.StartLine-1, 0), min(n.EndLine, len(lines))
+	if start >= end {
+		return ""
+	}
+
+	return strings.Join(lines[start:end], "\n")
+}
+
+// Label adds metadata labels to the Dockerfile.
+//
+// The original text is kept as it is: stevedore's keys are appended to an
+// existing LABEL instruction (rewriting its own keys, and keeping the existing
+// trace id, if it labelled the file before), or a new LABEL instruction is
+// inserted after the last instruction.
 func (l *Labeller) Label(dockerfile *Dockerfile, authorOverride string) (string, error) {
-	if dockerfile.Parsed == nil {
+	if dockerfile == nil || dockerfile.Parsed == nil {
 		return "", fmt.Errorf("dockerfile is nil")
 	}
 
-	var label *parser.Node
-	var endLine int
-	var layer int64
+	raw := dockerfile.Raw
+	if raw == nil {
+		var err error
+
+		raw, err = os.ReadFile(dockerfile.Path)
+		if err != nil {
+			return "", fmt.Errorf("failed to read %s: %w", dockerfile.Path, err)
+		}
+	}
+
+	eol := "\n"
+	if bytes.Contains(raw, []byte("\r\n")) {
+		eol = "\r\n"
+	}
+
+	lines := strings.Split(strings.TrimSuffix(strings.ReplaceAll(string(raw), "\r\n", "\n"), "\n"), "\n")
 
 	// Get author information
 	myUser, err := user.Current()
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to get current user, using default")
+
 		myUser = &user.User{Name: "unknown"}
 	}
 
@@ -95,87 +135,103 @@ func (l *Labeller) Label(dockerfile *Dockerfile, authorOverride string) (string,
 		myUser.Name = authorOverride
 	}
 
-	// Process AST nodes to find or create LABEL instruction
-	for _, child := range dockerfile.Parsed.AST.Children {
-		endLine = child.EndLine
+	var owned, lastLabel *parser.Node
 
-		if strings.Contains(child.Value, "LABEL") {
-			label = l.makeLabel(child, layer, myUser, endLine, dockerfile.Path)
+	lastEnd := 0
+
+	for _, child := range dockerfile.Parsed.AST.Children {
+		lastEnd = max(lastEnd, child.EndLine)
+
+		if strings.EqualFold(child.Value, "label") {
+			lastLabel = child
+
+			if traceRe.MatchString(nodeText(lines, child)) {
+				owned = child
+			}
 		}
 	}
 
-	// Create new label if none exists
-	if label == nil {
-		var newLabel parser.Node
-		l.makeLabel(&newLabel, layer, myUser, endLine, dockerfile.Path)
-		dockerfile.Parsed.AST.Children = append(dockerfile.Parsed.AST.Children, &newLabel)
+	trace := ""
+
+	if owned != nil {
+		if m := traceRe.FindStringSubmatch(nodeText(lines, owned)); m != nil {
+			trace = m[1]
+		}
 	}
 
-	// Build output from AST
-	var dump strings.Builder
-	for _, child := range dockerfile.Parsed.AST.Children {
-		dump.WriteString(child.Original)
-		dump.WriteString("\n")
+	if trace == "" {
+		trace = uuid.NewString()
 	}
 
-	return dump.String(), nil
+	keys := " layer.0.author=" + quote(myUser.Name) +
+		" layer.0.trace=" + quote(trace) +
+		` layer.0.tool="stevedore"` +
+		l.gitKeys(dockerfile.Path)
+
+	switch {
+	case owned != nil:
+		for i := max(owned.StartLine-1, 0); i < min(owned.EndLine, len(lines)); i++ {
+			lines[i] = ownedKeyRe.ReplaceAllString(lines[i], "")
+		}
+
+		end := min(owned.EndLine, len(lines)) - 1
+		lines[end] = strings.TrimRight(lines[end], " \t") + keys
+	case lastLabel != nil:
+		end := min(lastLabel.EndLine, len(lines)) - 1
+		lines[end] = strings.TrimRight(lines[end], " \t") + keys
+	default:
+		lines = slices.Insert(lines, min(lastEnd, len(lines)), "LABEL"+keys)
+	}
+
+	log.Info().Msgf("file: %s", dockerfile.Path)
+
+	return strings.Join(lines, eol) + eol, nil
 }
 
-// makeLabel creates a label node with metadata
-func (l *Labeller) makeLabel(child *parser.Node, layer int64, myUser *user.User, endLine int, filePath string) *parser.Node {
-	myLayer := " layer." + strconv.FormatInt(layer, 10)
+// gitKeys returns the git metadata keys for a file, or "" if there is none
+func (l *Labeller) gitKeys(filePath string) string {
+	if l.gitService == nil {
+		log.Debug().Msg("git service not available, skipping git metadata")
 
-	// Build base label
-	if strings.Contains(child.Value, "LABEL") {
-		child.Original = child.Original + myLayer +
-			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".trace=\"" + uuid.NewString() + "\""
-	} else {
-		child.Original = "LABEL" + myLayer +
-			".author=" + "\"" + myUser.Name + "\"" + myLayer + ".trace=\"" + uuid.NewString() + "\""
+		return ""
 	}
 
-	child.Original += myLayer + ".tool=\"stevedore\""
-	child.StartLine = endLine + 1
-	child.EndLine = endLine + 1
-
-	// Add git metadata if available
 	absPath, err := filepath.Abs(filePath)
 	if err != nil {
 		log.Warn().Err(err).Msgf("failed to get absolute path for %s", filePath)
-		return child
+
+		return ""
 	}
 
-	if l.gitService != nil {
-		l.addGitMetadata(child, absPath)
-	} else {
-		log.Debug().Msg("git service not available, skipping git metadata")
-	}
-
-	log.Info().Msgf("file: %s", filePath)
-	log.Info().Msgf("label: %s", child.Original)
-
-	return child
-}
-
-// addGitMetadata adds git-related metadata to the label
-func (l *Labeller) addGitMetadata(child *parser.Node, absPath string) {
 	// Get commit hash from the existing repository (not cloning!)
 	hash, err := l.gitService.GetCommitHash()
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to get git commit hash")
-		return
+
+		return ""
 	}
 
 	relPath, err := l.gitService.GetRelativePath(absPath)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to get relative path")
+
 		relPath = filepath.Base(absPath)
 	}
 
-	child.Original += " git_repo=" + "\"" + l.gitService.GetRepoName() + "\""
-	child.Original += " git_org=" + "\"" + l.gitService.GetOrganization() + "\""
-	child.Original += " git_file=" + "\"" + relPath + "\""
-	child.Original += " git_commit=" + "\"" + hash + "\""
+	var keys strings.Builder
+
+	if repo := l.gitService.GetRepoName(); repo != "" {
+		keys.WriteString(" git_repo=" + quote(repo))
+	}
+
+	if org := l.gitService.GetOrganization(); org != "" {
+		keys.WriteString(" git_org=" + quote(org))
+	}
+
+	keys.WriteString(" git_file=" + quote(filepath.ToSlash(relPath)))
+	keys.WriteString(" git_commit=" + quote(hash))
+
+	return keys.String()
 }
 
 // GetDockerLabels retrieves labels from a parent Docker image

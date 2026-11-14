@@ -66,8 +66,8 @@ func main() {
 					&cli.StringFlag{
 						Name:     "output",
 						Aliases:  []string{"o"},
-						Usage:    "Destination for updated Dockerfiles",
-						Value:    ".",
+						Usage:    "Directory to write updated Dockerfiles to, mirroring the scanned tree (default: update in place)",
+						Value:    "",
 						Category: "files",
 					},
 					&cli.StringFlag{

@@ -57,6 +57,9 @@ func TestDockerfile_Label(t *testing.T) {
 				return
 			}
 
+			// Label keeps the file's own line endings, so compare modulo CRLF.
+			got = strings.ReplaceAll(got, "\r\n", "\n")
+
 			dmp := diffmatchpatch.New()
 			diffs := dmp.DiffMain(got, tt.want, false)
 
