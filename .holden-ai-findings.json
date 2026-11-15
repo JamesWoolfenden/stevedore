@@ -1,0 +1,95 @@
+{
+  "category": "all",
+  "findings": [
+    {
+      "confidence": "high",
+      "explanation": "This Dockerfile is the one release.yml builds and pushes to Docker Hub as jameswoolfenden/stevedore:<tag>. It resolves whatever the GitHub 'latest' release is at build time (not the tag being published), downloads it with curl -k, and executes the resulting command string via sh, with no checksum or signature check. GoReleaser already produces checksums.txt and a GPG-signed checksum file for every release, so the verification material exists but is unused; any rebuild of an old tag silently ships different bytes, and a MITM or API tampering yields code execution in the published image. HLD_DF_008/HLD_DF_018 flag the individual flags; this is the composed supply-chain and reproducibility gap.",
+      "file": "Dockerfile",
+      "first_seen": "2026-11-14",
+      "fixable": false,
+      "id": "HOLDEN_AI_001",
+      "last_seen": "2026-11-14",
+      "line": 4,
+      "principle": "supply-chain",
+      "related_resources": [
+        "Dockerfile:5",
+        ".github/workflows/release.yml:publish-dockerhub",
+        ".goreleaser.yml"
+      ],
+      "remediation": "Pass the release version as a build ARG (set from github.ref_name), download that exact versioned asset without -k, verify it against checksums.txt (and ideally its .sig), then extract. Alternatively build the image from the goreleaser-produced binary (goreleaser dockers) so no download is needed.",
+      "resource": "dockerfile.RUN[curl latest release]",
+      "severity": "HIGH",
+      "status": "fixed",
+      "supersedes": "HLD_DF_018",
+      "suppression_reason": null,
+      "title": "Published image installs unverified 'latest' release binary over TLS-unverified, piped-to-sh download",
+      "unresolved_since": null
+    },
+    {
+      "confidence": "high",
+      "explanation": "The scheduled stale job grants contents: write, but actions/stale only needs it for the delete-branch option, which is not set. The job runs daily with a write-capable GITHUB_TOKEN (SHA-pinned first-party action, so exposure is small). No deterministic policy fires because the permission is explicitly scoped rather than read-all.",
+      "file": ".github/workflows/stale.yml",
+      "first_seen": "2026-11-14",
+      "fixable": false,
+      "id": "HOLDEN_AI_002",
+      "last_seen": "2026-11-14",
+      "line": 9,
+      "principle": "identity-and-access",
+      "related_resources": [],
+      "remediation": "Remove contents: write from the stale job. Keep issues: write and pull-requests: write, and add actions: write if the action needs to persist its state cache.",
+      "resource": "jobs.stale",
+      "severity": "LOW",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Stale workflow grants contents: write without using it",
+      "unresolved_since": null
+    },
+    {
+      "confidence": "high",
+      "explanation": "Under GitHub Actions the script ends with 'export stevedore_EXIT_CODE=$?' and never exits with it. The final command is export, which returns 0, so the container exits 0 even when stevedore label fails. A workflow using this action as a gate would pass on failure. A non-boolean-looking empty \"$flags\" is also passed as an empty argument. Not a rule-engine finding because the scripts are outside holden's targets; reported as the best-fit reliability principle.",
+      "file": "entrypoint.sh",
+      "first_seen": "2026-11-14",
+      "fixable": false,
+      "id": "HOLDEN_AI_003",
+      "last_seen": "2026-11-14",
+      "line": 17,
+      "principle": "reliability",
+      "related_resources": [
+        "Dockerfile:9"
+      ],
+      "remediation": "Replace the last two lines with: /usr/bin/stevedore label -f \"$INPUT_FILE\" ${flags:+\"$flags\"}  (and let its exit status be the script's, or add 'exit $stevedore_EXIT_CODE').",
+      "resource": "entrypoint.sh",
+      "severity": "MEDIUM",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Action entrypoint swallows stevedore's exit code, so the action always succeeds",
+      "unresolved_since": null
+    },
+    {
+      "confidence": "medium",
+      "explanation": "The working tree removes the checkov hook and deletes .checkov.yaml, and adds .holden.yaml, but nothing runs holden locally before commit, so Dockerfile and workflow findings are only seen when someone scans by hand. Confidence is medium because holden may be intended to run only in CI or the IDE.",
+      "file": ".pre-commit-config.yaml",
+      "first_seen": "2026-11-14",
+      "fixable": false,
+      "id": "HOLDEN_AI_004",
+      "last_seen": "2026-11-14",
+      "line": 3,
+      "principle": "repeatability",
+      "related_resources": [
+        ".holden.yaml",
+        ".checkov.yaml"
+      ],
+      "remediation": "Add a local pre-commit hook (repo: local, language: system) with entry 'holden scan' and pass_filenames: false, or a documented Makefile target if hooks are not wanted.",
+      "resource": "pre-commit.repos",
+      "severity": "LOW",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Pre-commit config has no IaC scanner after the checkov hook was removed",
+      "unresolved_since": null
+    }
+  ],
+  "scan_date": "2026-11-14T00:00:00Z",
+  "scan_path": ".",
+  "suggested_policies": [],
+  "suggested_suppressions": []
+}

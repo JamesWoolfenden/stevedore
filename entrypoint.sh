@@ -13,5 +13,7 @@ flags=""
 echo "running command:"
 echo stevedore label -f "$INPUT_FILE" "$flags"
 
-/usr/bin/stevedore label -f "$INPUT_FILE" "$flags"
-export stevedore_EXIT_CODE=$?
+/usr/bin/stevedore label -f "$INPUT_FILE" ${flags:+"$flags"}
+stevedore_EXIT_CODE=$?
+export stevedore_EXIT_CODE
+exit "$stevedore_EXIT_CODE"

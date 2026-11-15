@@ -1,0 +1,18 @@
+suppressions:
+  - policy_id: HLD_DF_003
+    resource_id: dockerfile.Dockerfile
+    reason: "Image is a container GitHub Action; the runner mounts the workspace owned by root/runner uid and a non-root USER cannot write to it (GitHub docs advise running container actions as root)"
+    approved_by: JamesWoolfenden
+    expires: "2027-02-14"
+
+  - policy_id: HLD_DF_021
+    resource_id: dockerfile_run.Dockerfile.0
+    reason: "Alpine package versions rotate out of the repo; pinning apk versions breaks rebuilds. Base image is digest-pinned instead"
+    approved_by: JamesWoolfenden
+    expires: "2027-02-14"
+
+  - policy_id: HLD_CI_013
+    resource_id: gha_step.release.yml.goreleaser.goreleaser-action
+    reason: "GoReleaser reads PASSPHRASE, GPG_FINGERPRINT and the Homebrew tap token from the environment by design (.goreleaser.yml uses .Env.*); they cannot be passed as action inputs. The redundant GPG_PRIVATE_KEY was removed"
+    approved_by: JamesWoolfenden
+    expires: "2027-02-14"
